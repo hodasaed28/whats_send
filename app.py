@@ -34,7 +34,7 @@ def index():
                 res = conn.getresponse()
                 data = res.read().decode("utf-8")
 
-                if '"sent":true' in data:
+                if '"sent":"true"' in data:
                     message = "✅ تم الإرسال بنجاح"
                     color = "green"
                     phone = ""
