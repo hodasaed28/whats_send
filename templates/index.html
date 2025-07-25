@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إرسال رسالة واتساب</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            margin: auto;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        input, textarea, button {
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .status {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <form method="POST">
+        <label>رقم الهاتف (+كود الدولة):</label>
+        <input type="text" name="phone" value="{{ phone }}" required>
+
+        <label>الرسالة:</label>
+        <textarea name="message" rows="5" required>{{ body }}</textarea>
+
+        <button type="submit">إرسال</button>
+
+        {% if message %}
+        <div class="status" style="color: {{ color }};">{{ message }}</div>
+        {% endif %}
+    </form>
+</body>
+</html>
