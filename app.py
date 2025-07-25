@@ -49,5 +49,8 @@ def index():
 
     return render_template("index.html", message=message, color=color, phone=phone, body=body)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+import os
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Railway provides this
+    app.run(debug=False, host="0.0.0.0", port=port)
