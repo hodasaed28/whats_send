@@ -1,54 +1,139 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>إرسال رسالة واتساب</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
-        }
-        form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 400px;
-            margin: auto;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        input, textarea, button {
-            width: 100%;
-            margin: 8px 0;
-            padding: 10px;
-            font-size: 16px;
-        }
-        button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .status {
-            text-align: center;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>إرسال رسالة واتساب</title>
+  <style>
+    body {
+      font-family: 'Tahoma', sans-serif;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      margin: 50px auto;
+      width: 400px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #status {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <form method="POST">
-        <label>رقم الهاتف (+كود الدولة):</label>
-        <input type="text" name="phone" value="{{ phone }}" required>
 
-        <label>الرسالة:</label>
-        <textarea name="message" rows="5" required>{{ body }}</textarea>
+<div class="container">
+  <form id="whatsappForm">
+    <label>رقم الهاتف (+كود الدولة):</label>
+    <div style="display: flex; gap: 10px;">
+      <select id="countryCode" style="width: 30%;">
+          <option disabled selected>جارٍ التحميل...</option>
+      </select>
+ 
+      <input type="text" id="phoneNumber" placeholder="رقم الهاتف بدون كود الدولة" required style="width: 70%;">
+    </div>
 
-        <button type="submit">إرسال</button>
+    <label>الرسالة:</label>
+    <textarea id="message" rows="5" placeholder="اكتب رسالتك هنا..." required></textarea>
 
-        {% if message %}
-        <div class="status" style="color: {{ color }};">{{ message }}</div>
-        {% endif %}
-    </form>
+    <button type="submit">إرسال</button>
+    <div id="status"></div>
+  </form>
+</div>
+
+<script>
+document.getElementById("whatsappForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const token = "xxxxxxxxxxx"; // Replace with your actual token
+  const instanceId = "instance134983";
+  const countryCode = document.getElementById("countryCode").value;
+  const phone = document.getElementById("phoneNumber").value.trim();
+  const message = document.getElementById("message").value;
+  const statusLabel = document.getElementById("status");
+
+  const fullNumber = countryCode + phone;
+  const data = `token=${encodeURIComponent(token)}&to=${encodeURIComponent(fullNumber)}&body=${encodeURIComponent(message)}`;
+
+  const xhr = new XMLHttpRequest();
+  xhr.withCredentials = false;
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      try {
+        const response = xhr.responseText;
+        if (response.includes('"sent":"true"')) {
+          statusLabel.textContent = "✅ تم الإرسال بنجاح";
+          statusLabel.style.color = "green";
+          document.getElementById("phoneNumber").value = "";
+          document.getElementById("message").value = "";
+        } else {
+          statusLabel.textContent = `❌ فشل في الإرسال: ${response}`;
+          statusLabel.style.color = "red";
+        }
+      } catch (error) {
+        statusLabel.textContent = `❌ خطأ في التحليل: ${error.message}`;
+        statusLabel.style.color = "red";
+      }
+    }
+  };
+
+  xhr.open("POST", `https://api.ultramsg.com/${instanceId}/messages/chat`);
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  try {
+    xhr.send(data);
+    statusLabel.textContent = "⏳ جاري الإرسال...";
+    statusLabel.style.color = "blue";
+  } catch (error) {
+    statusLabel.textContent = `❌ خطأ: ${error.message}`;
+    statusLabel.style.color = "red";
+  }
+});
+</script>
+<script>
+// Load country codes from external file
+fetch('country_codes.txt')
+  .then(response => {
+    if (!response.ok) throw new Error("فشل في تحميل كودات الدولة");
+    return response.text();
+  })
+  .then(data => {
+    document.getElementById("countryCode").innerHTML = data;
+  })
+  .catch(error => {
+    document.getElementById("countryCode").innerHTML = '<option>❌ خطأ في تحميل الكودات</option>';
+    console.error("Country code load error:", error);
+  });
+</script>
+
 </body>
 </html>
